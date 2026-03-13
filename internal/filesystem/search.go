@@ -3,10 +3,8 @@ package filesystem
 import (
 	"io/fs"
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/athosbes/PeritiaGo/internal/hash"
 	"github.com/athosbes/PeritiaGo/internal/models"
@@ -19,7 +17,7 @@ func SearchDrives(roots []string, targetExts []string, searchTerm string) []mode
 
 	for _, root := range roots {
 		log.Printf("Scanning root: %s ...\n", root)
-		
+
 		err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				// We ignore access denied or missing files during traversal
@@ -44,11 +42,11 @@ func SearchDrives(roots []string, targetExts []string, searchTerm string) []mode
 				}
 
 				h, _ := hash.FileSHA256(path)
-				
-				// Create time on Windows requires syscalls, ModTime is acceptable as fallback 
+
+				// Create time on Windows requires syscalls, ModTime is acceptable as fallback
 				// or we can just use ModTime for both if direct syscalls are too verbose.
 				// For the sake of simplicity, we'll use ModTime here as creation time in Go standard lib is obscured.
-				ctime := info.ModTime() 
+				ctime := info.ModTime()
 
 				evidence = append(evidence, models.EvidenceFile{
 					Path:     path,

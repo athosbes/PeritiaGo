@@ -1,0 +1,139 @@
+Data_Hora,Evento,Fonte,Descricao
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Verificação de integridade do PC Windows 4.0.2410.23001
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,LibreOffice 25.8.4.2 25.8.4.2
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Cirrus High Definition Audio Driver Setup 2.2.62
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Dell SupportAssist OS Recovery Plugin for Dell Update 5.5.15.1
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Proton Drive 1.12.5
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,REALTEK Wireless LAN and Bluetooth Driver 23.22.0324.0411
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Assinador SERPRO 4.3.3 4.3.3
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Java Auto Updater 2.8.481.10
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Dell SupportAssist 4.10.6.48716
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Java 8 Update 481 (64-bit) 8.0.4810.10
+2026-01-21 00:00:00 +0000 UTC,Software Installation,Registry,Proton Drive 1.12.5
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_communitymsires 17.14.36015
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK AddOn 10.1.0.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Executables (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Documentation (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows App Certification Kit Native Components 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Add to Path (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK DirectX x64 Remote 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Application Verifier x64 External Package (OnecoreUAP) 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual Studio Installer 4.0.2168.39045
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_minshellsharedmsi 17.14.36024
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Managed Apps Libs 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Development Libraries (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual C++ 2022 X64 Additional Runtime - 14.44.35211 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK DirectX x86 Remote 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Team Extension SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vcpp_crt.redist.clickonce 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Libs x86 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal CRT Tools x64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps Metadata 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 pip Bootstrap (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Subsystem for Linux 2.6.3.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Application Verifier x64 External Package (DesktopEditions) 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,DiagnosticsHub_CollectionService 17.14.36412
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Core Interpreter (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Test Suite (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Node.js 24.13.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,VS Script Debugging Common 17.0.157.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps Libs 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Standard Library (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual C++ 2022 X64 Debug Runtime - 14.44.35211 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps Contracts 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Ferramentas de Build do Visual Studio 2022 17.14.25 (January 2026)
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Headers x86 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK OnecoreUap Headers x86 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Modern Non-Versioned Developer Tools 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense Mobile - en-us 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense Desktop - en-us 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Tools x86 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal CRT Redistributable 10.0.26624
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Signing Tools 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Desktop Extension SDK Contracts 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK ARM64 Desktop Tools 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,MSI Development Tools 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense Desktop - Other Languages 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal CRT Extension SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_CoreEditorFonts 17.7.40001
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense IoT - Other Languages 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_filehandler_amd64 17.14.36024
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Headers arm64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_githubprotocolhandlermsi 17.14.36015
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK OnecoreUap Headers x64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Kits Configuration Installer 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps Headers OnecoreUap 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense UAP - Other Languages 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Headers x64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal CRT Headers Libraries and Sources 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows IoT Extension SDK Contracts 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual Studio Setup WMI Provider 3.12.2140.44225
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_communityx64msi 17.14.36025
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps DirectX x86 Remote 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Modern Versioned Developer Tools 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual C++ 2022 X64 Minimum Runtime - 14.44.35211 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Mobile Extension SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_FileTracker_Singleton 17.14.36015
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Redistributables 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_minshellinteropsharedmsi 17.14.36015
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense UAP - en-us 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Tools x64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK OnecoreUap Headers arm64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinAppDeploy 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Libs arm64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_minshellmsi 17.14.36301
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python 3.14.2 Tcl/Tk Support (64-bit) 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_filehandler_x86 17.14.36024
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal General MIDI DLS Extension SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_communitysharedmsi 17.14.36025
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_vswebprotocolselectormsires 17.14.36323
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Mobile Extension SDK Contracts 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Desktop Extension SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows IoT Extension SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,SDK ARM64 Additions 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal CRT Tools x86 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows App Certification Kit x64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_minshellmsires 17.14.36015
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows App Certification Kit SupportedApiList x86 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Universal CRT Redistributable 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual C++ 2022 X86 Minimum Runtime - 14.44.35211 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Facade Windows WinMD Versioned 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Python Launcher 3.14.2150.0
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense PPI - Other Languages 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_minshellinteropmsi 17.14.36015
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK EULA 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows Team Extension SDK Contracts 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps Tools 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,vs_vswebprotocolselectormsi 17.14.36323
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,SDK ARM64 Redistributables 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows App Certification Kit x64 (OnecoreUAP) 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Libs x64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual C++ 2022 X86 Debug Runtime - 14.44.35211 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual C++ 2022 X86 Additional Runtime - 14.44.35211 14.44.35211
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK Desktop Tools arm64 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense IoT - en-us 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Windows SDK for Windows Store Apps Headers 10.1.26100.7175
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Visual Studio Setup Configuration 3.12.2140.44225
+2026-01-23 00:00:00 +0000 UTC,Software Installation,Registry,WinRT Intellisense PPI - en-us 10.1.26100.7175
+2026-01-30 00:00:00 +0000 UTC,Software Installation,Registry,Bitvise SSH Client - FlowSshNet (x64) 9.56.0.0
+2026-01-30 00:00:00 +0000 UTC,Software Installation,Registry,Bitvise SSH Client - FlowSshNet (x86) 9.56.0.0
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Dell Connected Service Delivery SubAgent 1.1.0.0
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Windows Desktop Runtime - 8.0.23 (x64) 64.92.45458
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Dell Core Services 1.13.21.0
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Dell Connected Service Delivery 1.1.0.0
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft .NET Host FX Resolver - 8.0.23 (x64) 64.92.45415
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft .NET Runtime - 8.0.23 (x64) 64.92.45415
+2026-02-24 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft .NET Host - 8.0.23 (x64) 64.92.45415
+2026-02-26 00:00:00 +0000 UTC,Software Installation,Registry,Comet 145.0.7632.899
+2026-03-03 00:00:00 +0000 UTC,Software Installation,Registry,Trae (User) 3.5.34
+2026-03-04 00:00:00 +0000 UTC,Software Installation,Registry,Git 2.53.0
+2026-03-05 00:00:00 +0000 UTC,Software Installation,Registry,Google Chrome 145.0.7632.160
+2026-03-05 00:00:00 +0000 UTC,Software Installation,Registry,Audacity 3.7.7 3.7.7
+2026-03-08 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Edge 145.0.3800.97
+2026-03-08 00:00:00 +0000 UTC,Software Installation,Registry,Microsoft Edge WebView2 Runtime 145.0.3800.97
+2026-03-11 00:00:00 +0000 UTC,Software Installation,Registry,Brave 146.1.88.127
+2026-03-11 00:00:00 +0000 UTC,Software Installation,Registry,Antigravity (User) 1.20.5
+2026-03-12 00:00:00 +0000 UTC,Software Installation,Registry,Go Programming Language amd64 go1.25.8 1.25.8
+2026-03-13 00:17:37 -0300 -03,Amcache,Amcache,"Amcache.hve - AmcacheParser execution failed: exec: ""AmcacheParser.exe"": executable file not found in %PATH%"

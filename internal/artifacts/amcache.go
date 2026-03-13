@@ -21,16 +21,43 @@ func ParseAmcache(outputsDir string) []models.Artifact {
 		return artifacts
 	}
 
-	// For a complete integration, we assume AmcacheParser.exe is in PATH or current dir.
 	// We output its CSV to outputsDir/amcache/
 	outPath := filepath.Join(outputsDir, "amcache")
 	os.MkdirAll(outPath, 0755)
 
-	log.Println("Running AmcacheParser.exe ...")
-	cmd := exec.Command("AmcacheParser.exe", "-f", amcacheHve, "--csv", outPath)
-	err := cmd.Run()
+	// Determine executable directory for relative path resolution
+	exePath, err := os.Executable()
+	var baseDir string
+	if err == nil {
+		baseDir = filepath.Dir(exePath)
+	}
+
+	// Dual Version Support: Search in net9 and net4 folders relative to executable
+	parserPaths := []string{
+		filepath.Join(baseDir, "AmcacheParsernet9", "AmcacheParser.exe"),
+		filepath.Join(baseDir, "AmcacheParsernet4", "AmcacheParser.exe"),
+		filepath.Join("AmcacheParsernet9", "AmcacheParser.exe"), // Fallback to current dir
+		filepath.Join("AmcacheParsernet4", "AmcacheParser.exe"),
+		"AmcacheParser.exe", // Fallback to PATH
+	}
+
+	var selectedParser string
+	for _, p := range parserPaths {
+		if _, err := os.Stat(p); err == nil {
+			selectedParser = p
+			break
+		}
+	}
+
+	if selectedParser == "" {
+		selectedParser = "AmcacheParser.exe" // Final attempt assuming it's in PATH
+	}
+
+	log.Printf("Using Amcache Parser: %s\n", selectedParser)
+	cmd := exec.Command(selectedParser, "-f", amcacheHve, "--csv", outPath)
+	err = cmd.Run()
 	if err != nil {
-		log.Printf("Failed to run AmcacheParser.exe (is it in your PATH?): %v\n", err)
+		log.Printf("Failed to run Amcache Parser (ensure it is in AmcacheParsernet9 or AmcacheParsernet4): %v\n", err)
 		// We still record the artifact attempts
 		artifacts = append(artifacts, models.Artifact{
 			Name:        "Amcache.hve",

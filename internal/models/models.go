@@ -59,6 +59,7 @@ type FinalReport struct {
 	Timeline         []TimelineEvent `json:"timeline"`
 	EvidenceFiles    []EvidenceFile  `json:"evidence_files"`
 	Evidences        []Evidence      `json:"evidences"`
+	Screenshots      []string        `json:"screenshots"`
 	MasterManifest   []string        `json:"-"` // Not marshalled directly, just holds paths/hashes for manifest
 	MasterHash       string          `json:"master_hash"`
 }

@@ -14,23 +14,59 @@ import (
 	"github.com/athosbes/PeritiaGo/internal/export"
 	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/athosbes/PeritiaGo/internal/hash"
+	"github.com/athosbes/PeritiaGo/internal/identity"
 	"github.com/athosbes/PeritiaGo/internal/models"
 	"github.com/athosbes/PeritiaGo/internal/timeline"
+	"github.com/athosbes/PeritiaGo/internal/ui"
 )
 
 func main() {
 	log.Println("=== PeritiaGo Digital Forensics ===")
 	cfg := config.ParseConfig()
-	outDir := "outputs"
+
+	// Visual GUI for Investigator and Extensions if not provided via flags
+	if cfg.Investigator == "Perito" {
+		cfg.Investigator = ui.AskInvestigator()
+	}
+	if len(cfg.Extensions) == 0 {
+		extStr := ui.AskExtensions()
+		if extStr != "" {
+			parts := strings.Split(extStr, ",")
+			for _, p := range parts {
+				ext := strings.TrimSpace(p)
+				if !strings.HasPrefix(ext, ".") {
+					ext = "." + ext
+				}
+				cfg.Extensions = append(cfg.Extensions, ext)
+			}
+		}
+	}
+
+	// Dynamic Output Directory following pattern
+	machineUUID := identity.GetMachineUUID()
+	macAddr := identity.GetMACAddress()
+	timestamp := time.Now().Format("20060102_150405")
+	outDir := fmt.Sprintf("software_inventory_%s_%s_%s", machineUUID, macAddr, timestamp)
+	
 	os.MkdirAll(outDir, 0755)
+	log.Printf("Output directory: %s\n", outDir)
 
-	log.Println("[1] Capturing Installed Software via Registry")
+	log.Println("[1] Capturing Installed Software via Registry, WMIC & Winget")
 	softwares := capture.GetInstalledSoftware()
+	
+	// Add WMIC and Winget captures
+	capture.CaptureWMIC(outDir)
+	capture.CaptureWinget(outDir)
 
-	log.Println("[2] Opening Control Panel & Capturing Screenshot")
+	log.Println("[2] Opening Control Panels & Capturing Screenshots")
 	screenshotPath, err := capture.OpenAppWizAndCapture(outDir)
 	if err != nil {
-		log.Printf("[Warning] Screenshot failed: %v\n", err)
+		log.Printf("[Warning] Programs screenshot failed: %v\n", err)
+	}
+	
+	systemInfoPath, err := capture.OpenSystemInfoAndCapture(outDir)
+	if err != nil {
+		log.Printf("[Warning] System info screenshot failed: %v\n", err)
 	}
 
 	log.Println("[3] Parsing Execution Artifacts")
@@ -71,29 +107,41 @@ func main() {
 		Timeline:       tl,
 	}
 
-	if screenshotPath != "" {
-		report.Screenshots = append(report.Screenshots, screenshotPath)
-	}
+	if screenshotPath != "" { report.Screenshots = append(report.Screenshots, screenshotPath) }
+	if systemInfoPath != "" { report.Screenshots = append(report.Screenshots, systemInfoPath) }
 
-	// Export JSON/CSV
+	// Export JSON/CSV/HTML
 	var finalEvidences []models.Evidence
+	
 	csvOut, err := export.ToCSV(filepath.Join(outDir, "timeline.csv"), tl)
 	if err == nil { finalEvidences = append(finalEvidences, csvOut) }
 	
 	jsonOut, err := export.ToJSON(filepath.Join(outDir, "report.json"), report)
 	if err == nil { finalEvidences = append(finalEvidences, jsonOut) }
 
-	if screenshotPath != "" {
-		h, _ := hash.FileSHA256(screenshotPath)
+	// ROBUST EVIDENCE TRACKING: 
+	// Scan the entire output directory recursively to find ALL generated files (CSVs from AMCache, etc.)
+	filepath.WalkDir(outDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() { return nil }
+		
+		// Skip files we already handled explicitly if needed, but safer to just hash everything found
+		// and avoid duplicates in the manifest later.
+		relPath, _ := filepath.Rel(outDir, path)
+		if relPath == "manifesto.txt" || relPath == "report.json" || relPath == "timeline.csv" {
+			return nil
+		}
+
+		h, _ := hash.FileSHA256(path)
 		finalEvidences = append(finalEvidences, models.Evidence{
-			FileName:  "programas_instalados.png",
-			Path:      screenshotPath,
+			FileName:  filepath.Base(path),
+			Path:      path,
 			Hash:      h,
 			Timestamp: date,
 		})
-	}
+		return nil
+	})
 
-	// Compute hashes for evidence files to write into manifest
+	// Compute missing hashes and finalize report
 	for i := range finalEvidences {
 		if finalEvidences[i].Hash == "" {
 			h, _ := hash.FileSHA256(finalEvidences[i].Path)
@@ -107,7 +155,12 @@ func main() {
 	log.Println("[7] Creating Master Manifest")
 	manifestPath := filepath.Join(outDir, "manifesto.txt")
 	var manifestLines []string
+	
+	// Deduplicate and build manifest
+	seen := make(map[string]bool)
 	for _, e := range report.Evidences {
+		if seen[e.Path] { continue }
+		seen[e.Path] = true
 		line := fmt.Sprintf("%s | %s", filepath.Base(e.Path), e.Hash)
 		manifestLines = append(manifestLines, line)
 	}
@@ -126,5 +179,5 @@ func main() {
 		htmlOut.Hash = hHTML
 	}
 
-	log.Println("Forensic collection complete. Review 'outputs' directory.")
-}
+	log.Printf("Forensic collection complete. Review '%s' directory.\n", outDir)
+}
