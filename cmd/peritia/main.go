@@ -48,11 +48,9 @@ func main() {
 	arts = append(arts, artifacts.SearchResiduals(searchTerms)...)
 
 	log.Println("[4] Filesystem Search")
-	// Search in C:\Users by default for speed, but ideally could search entire drive
-	drives := []string{filepath.Join(os.Getenv("SystemDrive")+"\\", "Users")}
 	var evidences []models.EvidenceFile
 	if len(cfg.Extensions) > 0 || cfg.SearchTerm != "" {
-		evidences = filesystem.SearchDrives(drives, cfg.Extensions, cfg.SearchTerm)
+		evidences = filesystem.SearchDrives(cfg.Drives, cfg.Extensions, cfg.SearchTerm)
 	}
 
 	log.Println("[5] Generating Forensic Timeline")
@@ -126,7 +124,6 @@ func main() {
 	if err == nil {
 		hHTML, _ := hash.FileSHA256(htmlOut.Path)
 		htmlOut.Hash = hHTML
-		// We append the HTML hash manually to manifest later if needed, but it's generated after master calculation.
 	}
 
 	log.Println("Forensic collection complete. Review 'outputs' directory.")

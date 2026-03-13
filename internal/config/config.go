@@ -11,6 +11,7 @@ type AppConfig struct {
 	Investigator string
 	Extensions   []string
 	SearchTerm   string
+	Drives       []string
 }
 
 // ParseConfig parses command line flags and returns an AppConfig.
@@ -19,6 +20,7 @@ func ParseConfig() *AppConfig {
 	investigator := flag.String("investigator", "Perito", "Nome do perito/investigador")
 	extStr := flag.String("ext", "", "Extensoes para buscar (ex: exe,log,sqlite,db)")
 	search := flag.String("search", "", "Termo de busca de software (ex: AnyDesk)")
+	drivesStr := flag.String("drives", "C:\\Users", "Diretorios ou drives alvo separados por virgula (ex: C:\\,D:\\)")
 	
 	flag.Parse()
 
@@ -34,10 +36,19 @@ func ParseConfig() *AppConfig {
 		}
 	}
 
+	var drives []string
+	if *drivesStr != "" {
+		parts := strings.Split(*drivesStr, ",")
+		for _, p := range parts {
+			drives = append(drives, strings.TrimSpace(p))
+		}
+	}
+
 	return &AppConfig{
 		CaseName:     *caseName,
 		Investigator: *investigator,
 		Extensions:   extensions,
 		SearchTerm:   *search,
+		Drives:       drives,
 	}
 }
