@@ -52,7 +52,7 @@ func ToCSV(path string, data interface{}) (models.Evidence, error) {
 			if field.Tag.Get("csv") != "" {
 				val := elemVal.Field(j)
 				// Format simple string presentation for CSV
-				row = append(row, fmt.Sprintf("%v", val.Interface())) 
+				row = append(row, fmt.Sprintf("%v", val.Interface()))
 			}
 		}
 		if err := writer.Write(row); err != nil {

@@ -1,3 +1,0 @@
-timeline.csv | 324f67e3efd3cc5961b6eeb6a9e320a20508f1ea9d980ef30a4d212c801d15b9
-report.json | 64ac9cca162d76c0f3dc27ba6c3e0290ba3de8b52f02d833dc6c4b5b5e24ecae
-programas_instalados.png | 59bbfc07088a1e9f0ca9a77815c00ae93734d31cec3be8a8cfc0412ae4916d5e

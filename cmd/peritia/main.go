@@ -24,36 +24,22 @@ func main() {
 	log.Println("=== PeritiaGo Digital Forensics ===")
 	cfg := config.ParseConfig()
 
-	// Visual GUI for Investigator and Extensions if not provided via flags
+	// Visual GUI for all parameters if Investigator is default
 	if cfg.Investigator == "Perito" {
-		cfg.Investigator = ui.AskInvestigator()
-	}
-	if len(cfg.Extensions) == 0 {
-		extStr := ui.AskExtensions()
-		if extStr != "" {
-			parts := strings.Split(extStr, ",")
-			for _, p := range parts {
-				ext := strings.TrimSpace(p)
-				if !strings.HasPrefix(ext, ".") {
-					ext = "." + ext
-				}
-				cfg.Extensions = append(cfg.Extensions, ext)
-			}
-		}
+		ui.AskAllParameters(cfg)
 	}
 
 	// Dynamic Output Directory following pattern
-	machineUUID := identity.GetMachineUUID()
-	macAddr := identity.GetMACAddress()
+	fullIdentity := identity.GetFullIdentity()
 	timestamp := time.Now().Format("20060102_150405")
-	outDir := fmt.Sprintf("software_inventory_%s_%s_%s", machineUUID, macAddr, timestamp)
-	
+	outDir := fmt.Sprintf("software_inventory_%s_%s_%s", fullIdentity.MachineGUID, identity.GetMACAddress(), timestamp)
+
 	os.MkdirAll(outDir, 0755)
 	log.Printf("Output directory: %s\n", outDir)
 
 	log.Println("[1] Capturing Installed Software via Registry, WMIC & Winget")
 	softwares := capture.GetInstalledSoftware()
-	
+
 	// Add WMIC and Winget captures
 	capture.CaptureWMIC(outDir)
 	capture.CaptureWinget(outDir)
@@ -63,18 +49,29 @@ func main() {
 	if err != nil {
 		log.Printf("[Warning] Programs screenshot failed: %v\n", err)
 	}
-	
+
 	systemInfoPath, err := capture.OpenSystemInfoAndCapture(outDir)
 	if err != nil {
 		log.Printf("[Warning] System info screenshot failed: %v\n", err)
 	}
 
-	log.Println("[3] Parsing Execution Artifacts")
+	log.Println("[3] Parsing Execution Artifacts & Event Logs")
 	var arts []models.Artifact
 	arts = append(arts, artifacts.ParsePrefetch()...)
 	arts = append(arts, artifacts.ParseAmcache(outDir)...)
 	arts = append(arts, artifacts.ParseShimCache()...)
 	arts = append(arts, artifacts.ParseUserAssist()...)
+	arts = append(arts, capture.GetSystemStatus()...)
+	arts = append(arts, capture.GetRunningProcesses()...)
+
+	// Capture Event Logs for installs/uninstalls
+	softEvents := capture.GetSoftwareEvents()
+
+	// Capture residual traces
+	arts = append(arts, capture.SearchResidualTraces()...)
+
+	// Capture License Data
+	licenses := capture.GetLicenseData()
 
 	// Append search terms to check for residuals
 	var searchTerms []string
@@ -91,39 +88,65 @@ func main() {
 
 	log.Println("[5] Generating Forensic Timeline")
 	tl := timeline.Generate(softwares, arts, evidences)
+	// Add software events to timeline
+	for _, se := range softEvents {
+		tl = append(tl, models.TimelineEvent{
+			Timestamp:   se.Timestamp,
+			Event:       se.Event,
+			Source:      se.Source,
+			Description: se.Description,
+		})
+	}
 
 	log.Println("[6] Generating Final Report & Exports")
 	date := time.Now()
-	machine, _ := os.Hostname()
-	
+
 	report := models.FinalReport{
-		CaseName:       cfg.CaseName,
-		Investigator:   cfg.Investigator,
-		MachineName:    machine,
+		CaseName:     cfg.CaseName,
+		Investigator: cfg.Investigator,
+		Machine:      fullIdentity,
+		Metadata: models.ForensicMetadata{
+			CollectionDate: date,
+			ToolName:       "PeritiaGo",
+			ToolVersion:    "1.1.0",
+			Executor:       cfg.Investigator,
+			MachineName:    fullIdentity.Hostname,
+		},
 		CaptureDate:    date,
 		InstalledSofts: softwares,
 		Artifacts:      arts,
 		EvidenceFiles:  evidences,
 		Timeline:       tl,
+		Licenses:       licenses,
 	}
 
-	if screenshotPath != "" { report.Screenshots = append(report.Screenshots, screenshotPath) }
-	if systemInfoPath != "" { report.Screenshots = append(report.Screenshots, systemInfoPath) }
+	if screenshotPath != "" {
+		report.Screenshots = append(report.Screenshots, screenshotPath)
+	}
+	if systemInfoPath != "" {
+		report.Screenshots = append(report.Screenshots, systemInfoPath)
+	}
 
 	// Export JSON/CSV/HTML
 	var finalEvidences []models.Evidence
-	
-	csvOut, err := export.ToCSV(filepath.Join(outDir, "timeline.csv"), tl)
-	if err == nil { finalEvidences = append(finalEvidences, csvOut) }
-	
-	jsonOut, err := export.ToJSON(filepath.Join(outDir, "report.json"), report)
-	if err == nil { finalEvidences = append(finalEvidences, jsonOut) }
 
-	// ROBUST EVIDENCE TRACKING: 
+	csvOut, err := export.ToCSV(filepath.Join(outDir, "timeline.csv"), tl)
+	if err == nil {
+		finalEvidences = append(finalEvidences, csvOut)
+	}
+
+	jsonOut, err := export.ToJSON(filepath.Join(outDir, "report.json"), report)
+	if err == nil {
+		finalEvidences = append(finalEvidences, jsonOut)
+	}
+
+	// ROBUST EVIDENCE TRACKING:
 	// Scan the entire output directory recursively to find ALL generated files (CSVs from AMCache, etc.)
 	filepath.WalkDir(outDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() { return nil }
-		
+		if err != nil || d.IsDir() {
+			return nil
+		}
+
 		// Skip files we already handled explicitly if needed, but safer to just hash everything found
 		// and avoid duplicates in the manifest later.
 		relPath, _ := filepath.Rel(outDir, path)
@@ -155,19 +178,21 @@ func main() {
 	log.Println("[7] Creating Master Manifest")
 	manifestPath := filepath.Join(outDir, "manifesto.txt")
 	var manifestLines []string
-	
+
 	// Deduplicate and build manifest
 	seen := make(map[string]bool)
 	for _, e := range report.Evidences {
-		if seen[e.Path] { continue }
+		if seen[e.Path] {
+			continue
+		}
 		seen[e.Path] = true
 		line := fmt.Sprintf("%s | %s", filepath.Base(e.Path), e.Hash)
 		manifestLines = append(manifestLines, line)
 	}
-	
+
 	manifestContent := strings.Join(manifestLines, "\n")
 	os.WriteFile(manifestPath, []byte(manifestContent), 0644)
-	
+
 	masterHash := hash.StringSHA256(manifestContent)
 	report.MasterHash = masterHash
 	log.Printf("MASTER CHAIN OF CUSTODY HASH: %s\n", masterHash)
@@ -180,4 +205,4 @@ func main() {
 	}
 
 	log.Printf("Forensic collection complete. Review '%s' directory.\n", outDir)
-}
+}

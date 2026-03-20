@@ -13,7 +13,7 @@ import (
 func SearchResiduals(softwareNames []string) []models.Artifact {
 	var artifacts []models.Artifact
 	appData, _ := os.UserConfigDir()
-	
+
 	// We also search common roots
 	roots := []string{
 		filepath.Join(os.Getenv("SystemDrive")+"\\", "Program Files"),
@@ -26,7 +26,7 @@ func SearchResiduals(softwareNames []string) []models.Artifact {
 		if term == "" {
 			continue
 		}
-		
+
 		for _, root := range roots {
 			target := filepath.Join(root, term)
 			info, err := os.Stat(target)

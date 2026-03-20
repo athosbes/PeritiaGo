@@ -32,7 +32,7 @@ func ParseShimCache() []models.Artifact {
 		Description: "ShimCache binary data containing execution traces.",
 		Value:       fmt.Sprintf("%d bytes of execution cache data found", len(val)),
 	})
-	
+
 	log.Printf("ShimCache evidence found: %d bytes\n", len(val))
 	return artifacts
 }

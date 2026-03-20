@@ -10,7 +10,7 @@ import (
 // CaptureWinget runs winget list and saves it to a file.
 func CaptureWinget(outputsDir string) (string, error) {
 	log.Println("Capturing installed software via Winget...")
-	
+
 	// winget list --nowarn --ignore-warnings
 	cmd := exec.Command("winget", "list", "--nowarn", "--ignore-warnings")
 	output, err := cmd.Output()

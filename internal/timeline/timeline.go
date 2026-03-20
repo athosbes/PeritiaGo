@@ -50,7 +50,7 @@ func Generate(softs []models.Software, arts []models.Artifact, evidences []model
 			Source:      "Filesystem Search",
 			Description: e.Path,
 		})
-		
+
 		if e.Modified.After(e.Created) {
 			timeline = append(timeline, models.TimelineEvent{
 				Timestamp:   e.Modified,
