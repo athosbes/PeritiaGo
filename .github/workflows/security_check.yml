@@ -1,0 +1,45 @@
+name: Security Enforcement
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  check-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enforce Secure Wrappers
+        run: |
+          # Forbidden calls
+          FORBIDDEN=("os.WriteFile(" "os.Create(" "ioutil.WriteFile(")
+          
+          EXIT_CODE=0
+          
+          for call in "${FORBIDDEN[@]}"; do
+            # Search excluding allowed packages and tests
+            # We use grep -R and filter out internal/filesystem, internal/config, and *_test.go
+            MATCHES=$(grep -r "$call" . \
+              --exclude-dir="internal/filesystem" \
+              --exclude-dir="internal/config" \
+              --exclude-dir="internal/logger" \
+              --exclude="*_test.go" \
+              --exclude-dir=".git" \
+              --exclude-dir="scripts")
+            
+            if [ ! -z "$MATCHES" ]; then
+              echo "Error: Forbidden call '$call' found:"
+              echo "$MATCHES"
+              EXIT_CODE=1
+            fi
+          done
+          
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "Success: No forbidden calls detected."
+          else
+            echo "Failure: Security policy violated. Please use 'internal/filesystem' wrappers."
+            exit 1
+          fi

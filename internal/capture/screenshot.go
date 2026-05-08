@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/kbinani/screenshot"
 )
 
@@ -24,7 +25,7 @@ func CaptureScreen(outputPath string) error {
 		return fmt.Errorf("failed to create directory for screenshot: %w", err)
 	}
 
-	file, err := os.Create(outputPath)
+	file, err := filesystem.Create(outputPath)
 	if err != nil {
 		return fmt.Errorf("failed to create screenshot file: %w", err)
 	}

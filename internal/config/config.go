@@ -16,6 +16,9 @@ type AppConfig struct {
 	Extensions   []string `json:"extensions"`
 	SearchTerm   string   `json:"search_term"`
 	Drives       []string `json:"drives"`
+	ForensicMode bool     `json:"forensic_mode"`
+	OutputDir    string   `json:"output_dir"`
+	ExecutionID  string   `json:"execution_id"`
 }
 
 // ParseConfig parses command line flags and returns an AppConfig.
@@ -55,6 +58,7 @@ func ParseConfig() *AppConfig {
 	extStr := flag.String("ext", extDefault, "Extensoes para buscar (ex: exe,log,sqlite,db)")
 	search := flag.String("search", defaultConfig.SearchTerm, "Termo de busca de software (ex: AnyDesk)")
 	drivesStr := flag.String("drives", drivesDefault, "Diretorios ou drives alvo separados por virgula (ex: C:\\,D:\\)")
+	forensic := flag.Bool("forensic-mode", defaultConfig.ForensicMode, "Enable strict forensic mode (read-only except output dir)")
 
 	flag.Parse()
 
@@ -84,5 +88,10 @@ func ParseConfig() *AppConfig {
 		Extensions:   extensions,
 		SearchTerm:   *search,
 		Drives:       drives,
+		ForensicMode: *forensic,
 	}
 }
+
+// Global reference for other packages to check forensic state
+var CurrentConfig *AppConfig
+

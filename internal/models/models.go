@@ -33,14 +33,22 @@ type MachineIdentity struct {
 	MACAddresses map[string]string `json:"mac_addresses"` // Interface Name -> MAC
 }
 
+// WriteProtectionInfo provides details about the security measures in place.
+type WriteProtectionInfo struct {
+	Enabled           bool `json:"enabled"`
+	SymlinkProtection bool `json:"symlink_protection"`
+}
+
 // ForensicMetadata contains information about the collection process.
 type ForensicMetadata struct {
-	CollectionDate time.Time `json:"collection_date"`
-	ToolName       string    `json:"tool_name"`
-	ToolVersion    string    `json:"tool_version"`
-	Executor       string    `json:"executor"`
-	MachineName    string    `json:"machine_name"`
-	ReportHash     string    `json:"report_hash"`
+	CollectionDate  time.Time           `json:"collection_date"`
+	ToolName        string              `json:"tool_name"`
+	ToolVersion     string              `json:"tool_version"`
+	Executor        string              `json:"executor"`
+	MachineName     string              `json:"machine_name"`
+	ReportHash      string              `json:"report_hash"`
+	ForensicMode    bool                `json:"forensic_mode"`
+	WriteProtection WriteProtectionInfo `json:"write_protection"`
 }
 
 // Artifact represents a generic forensic artifact (e.g. registry key, file, log entry).

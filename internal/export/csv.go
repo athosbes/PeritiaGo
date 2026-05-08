@@ -3,15 +3,15 @@ package export
 import (
 	"encoding/csv"
 	"fmt"
-	"os"
 	"reflect"
 
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/athosbes/PeritiaGo/internal/models"
 )
 
 // ToCSV writes a slice of structs to a CSV file. Struct must have 'csv' tags.
 func ToCSV(path string, data interface{}) (models.Evidence, error) {
-	file, err := os.Create(path)
+	file, err := filesystem.Create(path)
 	if err != nil {
 		return models.Evidence{}, err
 	}

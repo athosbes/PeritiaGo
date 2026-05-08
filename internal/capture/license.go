@@ -26,6 +26,7 @@ func GetLicenseData() []models.LicenseData {
 
 	// Office and others could be added here
 
-	log.Printf("Captured %d license records\n", len(licenses))
+	// Avoid logging sensitive keys to standard logs
+	log.Printf("Captured %d license records (keys masked in logs)\n", len(licenses))
 	return licenses
 }

@@ -4,11 +4,13 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
+	"github.com/athosbes/PeritiaGo/internal/executor"
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/athosbes/PeritiaGo/internal/models"
+	"github.com/athosbes/PeritiaGo/internal/verify"
 )
 
 // ParseAmcache executes Eric Zimmerman's AmcacheParser.exe if available.
@@ -20,7 +22,10 @@ func ParseAmcache(outputsDir string) []models.Artifact {
 
 	// We output its CSV to outputsDir/amcache/
 	outPath, _ := filepath.Abs(filepath.Join(outputsDir, "amcache"))
-	os.MkdirAll(outPath, 0755)
+	if err := filesystem.MkdirAll(outPath, 0755); err != nil {
+		log.Printf("[Warning] Amcache write blocked: %v", err)
+		return artifacts
+	}
 
 	// Step 1: Find HVE files
 	hveFiles := findHVEFiles()
@@ -53,16 +58,29 @@ func ParseAmcache(outputsDir string) []models.Artifact {
 
 		for _, parser := range parsers {
 			log.Printf("Trying Amcache Parser: %s\n", parser)
-			cmd := exec.Command(parser, "-f", hve, "-i", "--csv", outPath, "--dt", "yyyy-MM-ddTHH:mm:ss")
-			cmd.Dir = filepath.Dir(parser)
+			// Ensure we use the absolute path for the parser
+			absParser, err := filepath.Abs(parser)
+			if err != nil {
+				log.Printf("[Warning] Failed to get absolute path for parser %s: %v\n", parser, err)
+				continue
+			}
 
-			if err := cmd.Run(); err == nil {
+			// SECURITY HARDENING: Verify digital signature before execution
+			if err := verify.IsSigned(absParser); err != nil {
+				log.Printf("[SECURITY WARNING] Skipping unsigned/invalid parser: %s (Error: %v)\n", absParser, err)
+				continue
+			}
+
+			// Use executor for secure execution
+			_, err = executor.Execute(absParser, "-f", hve, "-i", "--csv", outPath, "--dt", "yyyy-MM-ddTHH:mm:ss")
+
+			if err == nil {
 				success = true
-				usedParser = parser
+				usedParser = absParser
 				break
 			} else {
 				lastErr = err
-				log.Printf("[Warning] Parser %s failed: %v\n", parser, err)
+				log.Printf("[Warning] Parser %s failed: %v\n", absParser, err)
 			}
 		}
 
@@ -187,14 +205,15 @@ func findAmcacheParsers() []string {
 	var baseDir string
 	if err == nil {
 		baseDir = filepath.Dir(exePath)
+	} else {
+		return nil // Cannot find app dir, don't trust any relative path
 	}
 
+	// Only trust parsers within the application's base directory
 	parserPaths := []string{
 		filepath.Join(baseDir, "AmcacheParsernet9", "AmcacheParser.exe"),
 		filepath.Join(baseDir, "AmcacheParsernet4", "AmcacheParser.exe"),
 		filepath.Join(baseDir, "AmcacheParser.exe"),
-		filepath.Join("AmcacheParsernet9", "AmcacheParser.exe"),
-		filepath.Join("AmcacheParsernet4", "AmcacheParser.exe"),
 	}
 
 	var validPaths []string
@@ -204,14 +223,11 @@ func findAmcacheParsers() []string {
 			continue
 		}
 		seen[p] = true
-		if _, err := os.Stat(p); err == nil {
+		if info, err := os.Stat(p); err == nil && !info.IsDir() {
 			validPaths = append(validPaths, p)
 		}
 	}
 
-	if _, err := exec.LookPath("AmcacheParser.exe"); err == nil {
-		validPaths = append(validPaths, "AmcacheParser.exe")
-	}
-
+	// We removed LookPath for "AmcacheParser.exe" as it could be hijacked via PATH
 	return validPaths
 }

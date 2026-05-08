@@ -2,14 +2,14 @@ package export
 
 import (
 	"encoding/json"
-	"os"
 
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/athosbes/PeritiaGo/internal/models"
 )
 
 // ToJSON writes any data structure to a JSON file.
 func ToJSON(path string, data interface{}) (models.Evidence, error) {
-	file, err := os.Create(path)
+	file, err := filesystem.Create(path)
 	if err != nil {
 		return models.Evidence{}, err
 	}
