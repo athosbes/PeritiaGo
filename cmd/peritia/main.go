@@ -26,7 +26,8 @@ import (
 	"github.com/google/uuid"
 )
 
-const Version = "1.2.0"
+// Version is set at build time via -ldflags "-X main.Version=vX.Y.Z"
+var Version = "1.2.0-dev"
 
 func CalculateSelfHash() (string, string, int64, error) {
 	exePath, err := os.Executable()

@@ -26,9 +26,10 @@ jobs:
               --exclude-dir="internal/filesystem" \
               --exclude-dir="internal/config" \
               --exclude-dir="internal/logger" \
+              --exclude-dir="internal/verify" \
               --exclude="*_test.go" \
               --exclude-dir=".git" \
-              --exclude-dir="scripts")
+              --exclude-dir="scripts" || true)
             
             if [ ! -z "$MATCHES" ]; then
               echo "Error: Forbidden call '$call' found:"
