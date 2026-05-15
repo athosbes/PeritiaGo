@@ -2,9 +2,10 @@
 # This script ensures that no forbidden direct write calls are made outside the filesystem package.
 
 $forbidden = @("os.WriteFile", "os.Create", "ioutil.WriteFile")
-$allowedPackage = "internal\filesystem"
-$configPackage = "internal\config"
-$loggerPackage = "internal\logger"
+$allowedPackage = "internal\\filesystem"
+$configPackage = "internal\\config"
+$loggerPackage = "internal\\logger"
+$workflowDir = ".github"
 $testFiles = "*_test.go"
 
 $exitCode = 0
@@ -15,6 +16,7 @@ $files = Get-ChildItem -Recurse -Include *.go | Where-Object {
     $_.FullName -notmatch [regex]::Escape($allowedPackage) -and 
     $_.FullName -notmatch [regex]::Escape($configPackage) -and 
     $_.FullName -notmatch [regex]::Escape($loggerPackage) -and 
+    $_.FullName -notmatch [regex]::Escape($workflowDir) -and 
     $_.Name -notlike $testFiles
 }
 

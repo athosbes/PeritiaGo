@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/sigstore/sigstore-go/pkg/root"
 	"github.com/sigstore/sigstore-go/pkg/sign"
 	"github.com/sigstore/sigstore-go/pkg/tuf"
@@ -113,7 +114,7 @@ func SignBinary(path string, idToken string) error {
 	}
 
 	bundlePath := path + ".sigstore.json"
-	if err := os.WriteFile(bundlePath, bundleJSON, 0644); err != nil {
+	if err := filesystem.WriteFile(bundlePath, bundleJSON, 0644); err != nil {
 		return fmt.Errorf("failed to write bundle: %w", err)
 	}
 

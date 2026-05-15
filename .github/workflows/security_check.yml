@@ -20,16 +20,15 @@ jobs:
           EXIT_CODE=0
           
           for call in "${FORBIDDEN[@]}"; do
-            # Search excluding allowed packages and tests
-            # We use grep -R and filter out internal/filesystem, internal/config, and *_test.go
-            MATCHES=$(grep -r "$call" . \
+            # Search excluding allowed infrastructure packages, tests, and workflows
+            MATCHES=$(grep -rn "$call" . \
+              --exclude-dir=".github" \
               --exclude-dir="internal/filesystem" \
               --exclude-dir="internal/config" \
               --exclude-dir="internal/logger" \
-              --exclude-dir="internal/verify" \
-              --exclude="*_test.go" \
               --exclude-dir=".git" \
-              --exclude-dir="scripts" || true)
+              --exclude-dir="scripts" \
+              --exclude="*_test.go" || true)
             
             if [ ! -z "$MATCHES" ]; then
               echo "Error: Forbidden call '$call' found:"
