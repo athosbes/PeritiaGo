@@ -27,14 +27,13 @@ jobs:
           FORBIDDEN=("os.WriteFile(" "os.Create(" "ioutil.WriteFile(")
           EXIT_CODE=0
           for call in "${FORBIDDEN[@]}"; do
-            MATCHES=$(grep -rn "$call" . \
-              --exclude-dir=".github" \
-              --exclude-dir="internal/filesystem" \
-              --exclude-dir="internal/config" \
-              --exclude-dir="internal/logger" \
-              --exclude-dir=".git" \
-              --exclude-dir="scripts" \
-              --exclude="*_test.go" || true)
+            MATCHES=$(grep -rn "$call" . | \
+              grep -v "^./internal/filesystem/" | \
+              grep -v "^./internal/config/" | \
+              grep -v "^./internal/logger/" | \
+              grep -v "^./.github/" | \
+              grep -v "^./scripts/" | \
+              grep -v "_test.go:" || true)
             if [ ! -z "$MATCHES" ]; then
               echo "Error: Forbidden call '$call' found:"
               echo "$MATCHES"
