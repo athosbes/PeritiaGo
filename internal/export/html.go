@@ -2,14 +2,14 @@ package export
 
 import (
 	"html/template"
-	"os"
 
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 	"github.com/athosbes/PeritiaGo/internal/models"
 )
 
 // ToHTML builds a comprehensive HTML report from the FinalReport.
 func ToHTML(path string, report models.FinalReport) (models.Evidence, error) {
-	file, err := os.Create(path)
+	file, err := filesystem.Create(path)
 	if err != nil {
 		return models.Evidence{}, err
 	}

@@ -1,29 +1,49 @@
 package capture
 
 import (
+	"encoding/csv"
 	"log"
-	"os"
-	"os/exec"
 	"path/filepath"
+
+	"github.com/athosbes/PeritiaGo/internal/filesystem"
 )
 
-// CaptureWMIC runs wmic product get /format:csv and saves it to a file.
-func CaptureWMIC(outputsDir string) (string, error) {
-	log.Println("Capturing installed software via WMIC...")
+// Win32_Product represents the WMI class for installed software.
+type Win32_Product struct {
+	Name        string
+	Vendor      string
+	Version     string
+	InstallDate string
+}
 
-	// We use the full command to get all bits
-	cmd := exec.Command("wmic", "product", "get", "/format:csv")
-	output, err := cmd.Output()
+// CaptureInstalledSoftwareWMI captures installed software via native WMI (replacing WMIC).
+func CaptureInstalledSoftwareWMI(outputsDir string) (string, error) {
+	log.Println("Capturing installed software via Native WMI...")
+
+	var dst []Win32_Product
+	query := "SELECT Name, Vendor, Version, InstallDate FROM Win32_Product"
+	err := QueryWMI(query, &dst)
 	if err != nil {
-		log.Printf("[Warning] WMIC capture failed: %v", err)
+		log.Printf("[Warning] WMI software capture failed: %v", err)
 		return "", err
 	}
 
-	outputPath := filepath.Join(outputsDir, "wmic_products.csv")
-	err = os.WriteFile(outputPath, output, 0644)
+	csvPath := filepath.Join(outputsDir, "softwares_wmi.csv")
+	f, err := filesystem.Create(csvPath)
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 
-	return outputPath, nil
+	writer := csv.NewWriter(f)
+	defer writer.Flush()
+
+	// Write Header
+	writer.Write([]string{"Name", "Vendor", "Version", "InstallDate"})
+
+	for _, p := range dst {
+		writer.Write([]string{p.Name, p.Vendor, p.Version, p.InstallDate})
+	}
+
+	return csvPath, nil
 }

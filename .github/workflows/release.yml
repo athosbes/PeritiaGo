@@ -1,0 +1,265 @@
+name: Build, Sign & Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.2.0, v1.3.0-beta, etc.
+
+permissions:
+  contents: write        # Create releases and upload assets
+  id-token: write        # Required for Sigstore OIDC token
+
+env:
+  GO_VERSION: '1.25'
+  BINARY_NAME: peritia.exe
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Job 1: Security checks (reuse existing logic)
+  # ─────────────────────────────────────────────
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enforce Secure Wrappers
+        run: |
+          FORBIDDEN=("os.WriteFile(" "os.Create(" "ioutil.WriteFile(")
+          EXIT_CODE=0
+          for call in "${FORBIDDEN[@]}"; do
+            MATCHES=$(grep -rn "$call" . | \
+              grep -v "^./internal/filesystem/" | \
+              grep -v "^./internal/config/" | \
+              grep -v "^./internal/logger/" | \
+              grep -v "^./.github/" | \
+              grep -v "^./scripts/" | \
+              grep -v "_test.go:" || true)
+            if [ ! -z "$MATCHES" ]; then
+              echo "Error: Forbidden call '$call' found:"
+              echo "$MATCHES"
+              EXIT_CODE=1
+            fi
+          done
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✅ No forbidden calls detected."
+          else
+            echo "❌ Security policy violated."
+            exit 1
+          fi
+
+  # ─────────────────────────────────────────────
+  # Job 2: Build the Windows executable
+  # ─────────────────────────────────────────────
+  build:
+    needs: security-check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          echo "Building version: $version"
+
+      - name: Install go-winres (Windows resource compiler)
+        run: go install github.com/tc-hib/go-winres@latest
+
+      - name: Generate Windows resources (icon, version info)
+        working-directory: cmd/peritia
+        run: go-winres make --in ../../winres/winres.json --product-version "${{ steps.version.outputs.VERSION }}" --file-version "${{ steps.version.outputs.VERSION }}"
+
+      - name: Build peritia.exe
+        run: |
+          go build -trimpath -ldflags "-s -w -X main.Version=${{ steps.version.outputs.VERSION }}" -o ${{ env.BINARY_NAME }} ./cmd/peritia
+
+      - name: Build peritiatool.exe
+        run: |
+          go build -trimpath -ldflags "-s -w" -o peritiatool.exe ./cmd/peritiatool
+
+      - name: Generate SHA256 checksums
+        shell: pwsh
+        run: |
+          $peritiaHash = (Get-FileHash -Algorithm SHA256 ${{ env.BINARY_NAME }}).Hash.ToLower()
+          $toolHash    = (Get-FileHash -Algorithm SHA256 peritiatool.exe).Hash.ToLower()
+          @"
+          $peritiaHash  ${{ env.BINARY_NAME }}
+          $toolHash  peritiatool.exe
+          "@ | Out-File -Encoding utf8 checksums_sha256.txt
+          Write-Host "Checksums:"
+          Get-Content checksums_sha256.txt
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: peritiago-binaries
+          path: |
+            ${{ env.BINARY_NAME }}
+            peritiatool.exe
+            checksums_sha256.txt
+          retention-days: 1
+
+  # ─────────────────────────────────────────────
+  # Job 3: Sign with Sigstore
+  # ─────────────────────────────────────────────
+  sign:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # OIDC token for Sigstore
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: peritiago-binaries
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign peritia.exe with Sigstore (keyless)
+        run: |
+          cosign sign-blob \
+            --yes \
+            --output-signature peritia.exe.sig \
+            --output-certificate peritia.exe.crt \
+            --bundle peritia.exe.sigstore.json \
+            peritia.exe
+          echo "✅ peritia.exe signed with Sigstore"
+
+      - name: Sign peritiatool.exe with Sigstore (keyless)
+        run: |
+          cosign sign-blob \
+            --yes \
+            --output-signature peritiatool.exe.sig \
+            --output-certificate peritiatool.exe.crt \
+            --bundle peritiatool.exe.sigstore.json \
+            peritiatool.exe
+          echo "✅ peritiatool.exe signed with Sigstore"
+
+      - name: Sign checksums file with Sigstore
+        run: |
+          cosign sign-blob \
+            --yes \
+            --output-signature checksums_sha256.txt.sig \
+            --output-certificate checksums_sha256.txt.crt \
+            --bundle checksums_sha256.txt.sigstore.json \
+            checksums_sha256.txt
+          echo "✅ checksums_sha256.txt signed with Sigstore"
+
+      - name: Verify all signatures
+        run: |
+          for file in peritia.exe peritiatool.exe checksums_sha256.txt; do
+            echo "Verifying $file..."
+            cosign verify-blob \
+              --bundle "${file}.sigstore.json" \
+              --certificate-identity-regexp ".*" \
+              --certificate-oidc-issuer-regexp ".*" \
+              "$file"
+            echo "✅ $file verified"
+          done
+
+      - name: Upload signed artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: peritiago-signed
+          path: |
+            peritia.exe
+            peritia.exe.sig
+            peritia.exe.crt
+            peritia.exe.sigstore.json
+            peritiatool.exe
+            peritiatool.exe.sig
+            peritiatool.exe.crt
+            peritiatool.exe.sigstore.json
+            checksums_sha256.txt
+            checksums_sha256.txt.sig
+            checksums_sha256.txt.crt
+            checksums_sha256.txt.sigstore.json
+          retention-days: 1
+
+  # ─────────────────────────────────────────────
+  # Job 4: Create GitHub Release
+  # ─────────────────────────────────────────────
+  release:
+    needs: sign
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog
+
+      - name: Download signed artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: peritiago-signed
+
+      - name: Generate changelog
+        id: changelog
+        shell: bash
+        run: |
+          # Get previous tag
+          PREV_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
+          CURRENT_TAG="${{ github.ref_name }}"
+          
+          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "$CURRENT_TAG" ]; then
+            CHANGELOG="Initial release"
+          else
+            CHANGELOG=$(git log "${PREV_TAG}..${CURRENT_TAG}" --pretty=format:"- %s (%an)" --no-merges)
+          fi
+          
+          # Save to file (multi-line safe)
+          echo "$CHANGELOG" > changelog.txt
+          echo "Generated changelog from $PREV_TAG to $CURRENT_TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "PeritiaGo ${{ github.ref_name }}"
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') || contains(github.ref_name, '-alpha') }}
+          body_path: changelog.txt
+          append_body: true
+          body: |
+            
+            ---
+            
+            ## 🔐 Sigstore Verification
+            
+            All binaries are signed with [Sigstore](https://sigstore.dev/) (keyless, OIDC-based).
+            To verify the signature of any file, install [cosign](https://docs.sigstore.dev/cosign/system_config/installation/) and run:
+            
+            ```bash
+            cosign verify-blob \
+              --bundle peritia.exe.sigstore.json \
+              --certificate-identity-regexp ".*@github" \
+              --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+              peritia.exe
+            ```
+            
+            ## 📋 SHA256 Checksums
+            
+            See `checksums_sha256.txt` for file hashes. The checksums file itself is also Sigstore-signed.
+            
+          files: |
+            peritia.exe
+            peritia.exe.sig
+            peritia.exe.crt
+            peritia.exe.sigstore.json
+            peritiatool.exe
+            peritiatool.exe.sig
+            peritiatool.exe.crt
+            peritiatool.exe.sigstore.json
+            checksums_sha256.txt
+            checksums_sha256.txt.sig
+            checksums_sha256.txt.crt
+            checksums_sha256.txt.sigstore.json

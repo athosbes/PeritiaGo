@@ -2,14 +2,22 @@ package ui
 
 import (
 	"log"
-	"os/exec"
+	"os"
 	"strings"
 
 	"github.com/athosbes/PeritiaGo/internal/config"
+	"github.com/athosbes/PeritiaGo/internal/executor"
 )
 
 // AskAllParameters presents a Windows Form to the user to capture all execution parameters.
 func AskAllParameters(cfg *config.AppConfig) {
+	// Securely pass initial values via environment variables to avoid string interpolation injection
+	os.Setenv("PERITIAGO_CASE", cfg.CaseName)
+	os.Setenv("PERITIAGO_INV", cfg.Investigator)
+	os.Setenv("PERITIAGO_EXT", strings.Join(cfg.Extensions, ","))
+	os.Setenv("PERITIAGO_SEARCH", cfg.SearchTerm)
+	os.Setenv("PERITIAGO_DRIVES", strings.Join(cfg.Drives, ","))
+
 	script := `
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
@@ -30,7 +38,7 @@ $objForm.Controls.Add($lblCase)
 $txtCase = New-Object System.Windows.Forms.TextBox 
 $txtCase.Location = New-Object System.Drawing.Point(10,40) 
 $txtCase.Size = New-Object System.Drawing.Size(360,20) 
-$txtCase.Text = '` + cfg.CaseName + `'
+$txtCase.Text = $env:PERITIAGO_CASE
 $objForm.Controls.Add($txtCase) 
 
 # Investigator
@@ -43,7 +51,7 @@ $objForm.Controls.Add($lblInv)
 $txtInv = New-Object System.Windows.Forms.TextBox 
 $txtInv.Location = New-Object System.Drawing.Point(10,90) 
 $txtInv.Size = New-Object System.Drawing.Size(360,20) 
-$txtInv.Text = '` + cfg.Investigator + `'
+$txtInv.Text = $env:PERITIAGO_INV
 $objForm.Controls.Add($txtInv)
 
 # Extensions
@@ -56,7 +64,7 @@ $objForm.Controls.Add($lblExt)
 $txtExt = New-Object System.Windows.Forms.TextBox 
 $txtExt.Location = New-Object System.Drawing.Point(10,140) 
 $txtExt.Size = New-Object System.Drawing.Size(360,20) 
-$txtExt.Text = '` + strings.Join(cfg.Extensions, ",") + `'
+$txtExt.Text = $env:PERITIAGO_EXT
 $objForm.Controls.Add($txtExt)
 
 # SearchTerm
@@ -69,7 +77,7 @@ $objForm.Controls.Add($lblSearch)
 $txtSearch = New-Object System.Windows.Forms.TextBox 
 $txtSearch.Location = New-Object System.Drawing.Point(10,190) 
 $txtSearch.Size = New-Object System.Drawing.Size(360,20) 
-$txtSearch.Text = '` + cfg.SearchTerm + `'
+$txtSearch.Text = $env:PERITIAGO_SEARCH
 $objForm.Controls.Add($txtSearch)
 
 # Drives
@@ -82,7 +90,7 @@ $objForm.Controls.Add($lblDrives)
 $txtDrives = New-Object System.Windows.Forms.TextBox 
 $txtDrives.Location = New-Object System.Drawing.Point(10,240) 
 $txtDrives.Size = New-Object System.Drawing.Size(360,20) 
-$txtDrives.Text = '` + strings.Join(cfg.Drives, ",") + `'
+$txtDrives.Text = $env:PERITIAGO_DRIVES
 $objForm.Controls.Add($txtDrives)
 
 $OKButton = New-Object System.Windows.Forms.Button
@@ -102,8 +110,8 @@ if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
 }
 `
 
-	cmd := exec.Command("powershell", "-NoProfile", "-Command", script)
-	outputBytes, err := cmd.Output()
+	outputBytes, err := executor.Execute("powershell", "-NoProfile", "-Command", script)
+
 	if err != nil {
 		log.Printf("[Warning] Failed to show config UI: %v", err)
 		return

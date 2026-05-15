@@ -3,10 +3,10 @@ package capture
 import (
 	"fmt"
 	"log"
-	"os/exec"
 	"strings"
 	"time"
 
+	"github.com/athosbes/PeritiaGo/internal/executor"
 	"github.com/athosbes/PeritiaGo/internal/models"
 )
 
@@ -18,7 +18,8 @@ func GetSoftwareEvents() []models.TimelineEvent {
 	// Events 1033, 11707 (Install) and 1034, 11724 (Uninstall) are common.
 	query := `*[System[Provider[@Name='MsiInstaller'] and TimeCreated[timediff(@SystemTime) <= 15552000000]]]`
 
-	out, err := exec.Command("wevtutil", "qe", "Application", "/q:"+query, "/f:text").Output()
+	// Use secure executor for wevtutil
+	out, err := executor.Execute("wevtutil", "qe", "Application", "/q:"+query, "/f:text")
 	if err != nil {
 		log.Printf("[Warning] Failed to query Event Log: %v", err)
 		return events

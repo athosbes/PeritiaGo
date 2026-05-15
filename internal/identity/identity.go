@@ -3,22 +3,43 @@ package identity
 import (
 	"net"
 	"os"
-	"os/exec"
 	"os/user"
 	"strings"
 
+	"github.com/athosbes/PeritiaGo/internal/capture"
 	"github.com/athosbes/PeritiaGo/internal/models"
 	"golang.org/x/sys/windows/registry"
 )
 
+// Win32_ComputerSystemProduct represents the WMI class for computer hardware.
+type Win32_ComputerSystemProduct struct {
+	Vendor            string
+	Name              string
+	IdentifyingNumber string
+	UUID              string
+}
+
+// Win32_ComputerSystem represents the WMI class for computer system info.
+type Win32_ComputerSystem struct {
+	Domain string
+}
+
 // GetFullIdentity gathers all requested identification data for the machine.
 func GetFullIdentity() models.MachineIdentity {
-	hostname, _ := os.Hostname()
-	currUser, _ := user.Current()
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = "unknown-hostname"
+	}
+
+	currUser, err := user.Current()
+	username := "unknown-user"
+	if err == nil {
+		username = currUser.Username
+	}
 
 	id := models.MachineIdentity{
 		Hostname:     hostname,
-		CurrentUser:  currUser.Username,
+		CurrentUser:  username,
 		MachineGUID:  GetMachineUUID(),
 		IPAddresses:  getIPAddresses(),
 		MACAddresses: getMACAddresses(),
@@ -66,39 +87,24 @@ func getOSInfo() (name, version, build string) {
 }
 
 func getHardwareInfo() (vendor, model, serial, uuid string) {
-	// Using wmic as a fallback for complex hardware info
-	out, err := exec.Command("wmic", "csproduct", "get", "Vendor,Name,IdentifyingNumber,UUID", "/format:list").Output()
-	if err == nil {
-		lines := strings.Split(string(out), "\n")
-		for _, line := range lines {
-			parts := strings.SplitN(line, "=", 2)
-			if len(parts) == 2 {
-				val := strings.TrimSpace(parts[1])
-				switch strings.TrimSpace(parts[0]) {
-				case "Vendor":
-					vendor = val
-				case "Name":
-					model = val
-				case "IdentifyingNumber":
-					serial = val
-				case "UUID":
-					uuid = val
-				}
-			}
-		}
+	var dst []Win32_ComputerSystemProduct
+	query := "SELECT Vendor, Name, IdentifyingNumber, UUID FROM Win32_ComputerSystemProduct"
+	err := capture.QueryWMI(query, &dst)
+	if err == nil && len(dst) > 0 {
+		vendor = dst[0].Vendor
+		model = dst[0].Name
+		serial = dst[0].IdentifyingNumber
+		uuid = dst[0].UUID
 	}
 	return
 }
 
 func getDomainInfo() string {
-	out, err := exec.Command("wmic", "computersystem", "get", "domain", "/format:list").Output()
-	if err == nil {
-		lines := strings.Split(string(out), "\n")
-		for _, line := range lines {
-			if strings.Contains(line, "=") {
-				return strings.TrimSpace(strings.Split(line, "=")[1])
-			}
-		}
+	var dst []Win32_ComputerSystem
+	query := "SELECT Domain FROM Win32_ComputerSystem"
+	err := capture.QueryWMI(query, &dst)
+	if err == nil && len(dst) > 0 {
+		return dst[0].Domain
 	}
 	return "WORKGROUP"
 }

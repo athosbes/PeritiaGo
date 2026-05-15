@@ -2,8 +2,6 @@ package capture
 
 import (
 	"fmt"
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/athosbes/PeritiaGo/internal/models"
@@ -12,51 +10,47 @@ import (
 // GetRunningProcesses lists currently active volatile memory processes.
 // This is critical for catching portable, unauthorized, or unlicensed software running
 // actively in RAM that has not left explicit Registry Install traces.
+// Win32_Process represents the WMI class for system processes.
+type Win32_Process struct {
+	Caption        string
+	ExecutablePath *string // Use pointer because it can be null for system processes
+	ProcessId      uint32
+}
+
+// GetRunningProcesses lists currently active volatile memory processes.
 func GetRunningProcesses() []models.Artifact {
 	var arts []models.Artifact
 	now := time.Now().Format(time.RFC3339)
 
-	// wmic process get Caption,ExecutablePath,ProcessId /format:csv
-	out, err := exec.Command("wmic", "process", "get", "Caption,ExecutablePath,ProcessId", "/format:csv").Output()
+	var dst []Win32_Process
+	query := "SELECT Caption, ExecutablePath, ProcessId FROM Win32_Process"
+	err := QueryWMI(query, &dst)
 	if err != nil {
 		arts = append(arts, models.Artifact{
 			Name:        "Volatile Processes (RAM)",
 			Type:        "MemoryProcess",
 			Path:        "Memory",
-			Description: "Failed to enumerate running processes.",
+			Description: "Failed to enumerate running processes via WMI.",
 			Value:       err.Error(),
 			Timestamp:   now,
 		})
 		return arts
 	}
 
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, "Node") {
-			continue
+	for _, p := range dst {
+		procPath := "Path Restricted/System"
+		if p.ExecutablePath != nil {
+			procPath = *p.ExecutablePath
 		}
 
-		parts := strings.SplitN(line, ",", 4)
-		if len(parts) >= 4 {
-			// Expected format from wmic csv: Node,Caption,ExecutablePath,ProcessId
-			procName := parts[1]
-			procPath := parts[2]
-			procID := parts[3]
-
-			if procPath == "" {
-				procPath = "Path Restricted/System"
-			}
-
-			arts = append(arts, models.Artifact{
-				Name:        procName,
-				Type:        "MemoryProcess",
-				Path:        procPath,
-				Description: fmt.Sprintf("Live Execution PID: %s", procID),
-				Value:       "Running in Volatile Memory",
-				Timestamp:   now,
-			})
-		}
+		arts = append(arts, models.Artifact{
+			Name:        p.Caption,
+			Type:        "MemoryProcess",
+			Path:        procPath,
+			Description: fmt.Sprintf("Live Execution PID: %d", p.ProcessId),
+			Value:       "Running in Volatile Memory",
+			Timestamp:   now,
+		})
 	}
 
 	return arts
