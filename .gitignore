@@ -28,5 +28,13 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+ .idea/
+ .vscode/
+
+# Arquivos de recursos do Windows gerados dinamicamente
+*.syso
+*.rsrc
+*.rc
+
+# Opcional: Ignorar a pasta de build temporária do Go se você buildar localmente
+/cmd/peritia/winres/
